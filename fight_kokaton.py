@@ -141,11 +141,24 @@ class Bomb:
         screen.blit(self.img, self.rct)
 
 
+class Score:
+    def __init__(self):
+        self.font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
+        self.color = (0, 0, 255)
+        self.score = 0
+        self.img = self.font.render(f"スコア:{self.score}", 0, self.color)
+        self.center = (100, HEIGHT-50)
+    def update(self, screen: pg.Surface):
+        self.img = self.font.render(f"スコア:{self.score}", 0, self.color)
+        screen.blit(self.img, self.center)
+
+
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
     bg_img = pg.image.load("fig/pg_bg.jpg")
     bird = Bird((300, 200)) #こうかとんインスタンスを作る
+    score = Score() #スコアインスタンスを作る
     #bomb = Bomb((255, 0, 0), 10) #ボムインスタンスを作る（赤,　半径）
     beam = None #Beam(bird) #ビームインスタンスを作る
     #bomb2 = Bomb((0, 0, 255), 20)
@@ -178,6 +191,7 @@ def main():
                 if beam.rct.colliderect(bomb.rct): #こうかとんとボムの衝突判定
                     beam = None
                     bombs[i] = None
+                    score.score += 1
                     bird.change_img(6, screen) #第一引数には画像番号
                     pg.display.update()
 
@@ -192,6 +206,7 @@ def main():
         #beam.update(screen) #ビームがないとエラーが出る↓
         if beam is not None: #ビームがあるときだけ実行して解決
             beam.update(screen) 
+        score.update(screen)
         pg.display.update()
         tmr += 1
         clock.tick(50)
