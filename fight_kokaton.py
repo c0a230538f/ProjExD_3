@@ -107,7 +107,8 @@ class Beam:
         """
         if check_bound(self.rct) == (True, True): #画面の外に行ったら表示しない
             self.rct.move_ip(self.vx, self.vy)
-            screen.blit(self.img, self.rct)    
+            screen.blit(self.img, self.rct)
+            
 
 
 class Bomb:
@@ -160,8 +161,9 @@ def main():
     bird = Bird((300, 200)) #こうかとんインスタンスを作る
     score = Score() #スコアインスタンスを作る
     #bomb = Bomb((255, 0, 0), 10) #ボムインスタンスを作る（赤,　半径）
-    beam = None #Beam(bird) #ビームインスタンスを作る
+    #beam = None #Beam(bird) #ビームインスタンスを作る
     #bomb2 = Bomb((0, 0, 255), 20)
+    beams = []
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMS)] #ボムインスタンスを5つ作る
     clock = pg.time.Clock()
     tmr = 0
@@ -171,7 +173,7 @@ def main():
                 return #終了
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE: #何かキーが押されたら、かつ、スペースキーなら
                 # スペースキー押下でBeamクラスのインスタンス生成
-                beam = Beam(bird)            
+                beams.append(Beam(bird))            
         screen.blit(bg_img, [0, 0])
         
         for bomb in bombs:
@@ -187,13 +189,15 @@ def main():
         
         
         for i, bomb in enumerate(bombs):
-            if beam is not None: #ビームがあるときだけ衝突判定。ないとエラーになる
-                if beam.rct.colliderect(bomb.rct): #こうかとんとボムの衝突判定
-                    beam = None
-                    bombs[i] = None
-                    score.score += 1
-                    bird.change_img(6, screen) #第一引数には画像番号
-                    pg.display.update()
+            if beams: #ビームがあるときだけ衝突判定。ないとエラーになる
+                for j, beam in enumerate(beams):
+                    if beam.rct.colliderect(bomb.rct): #こうかとんとボムの衝突判定
+                        beams[j] = None
+                        bombs[i] = None
+                        score.score += 1
+                        bird.change_img(6, screen) #第一引数には画像番号
+                        pg.display.update()
+                        beams = [beam for beam in beams if beam is not None]
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
@@ -204,8 +208,9 @@ def main():
             bomb.update(screen)
         #bomb2.update(screen)
         #beam.update(screen) #ビームがないとエラーが出る↓
-        if beam is not None: #ビームがあるときだけ実行して解決
-            beam.update(screen) 
+        if beams: #ビームがあるときだけ実行して解決
+            for beam in beams:
+                beam.update(screen)
         score.update(screen)
         pg.display.update()
         tmr += 1
